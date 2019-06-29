@@ -1,0 +1,142 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="../themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="lib/jquery-ui-1.8.4.css"/>
+    <!--<script type="text/javascript" src="../JS/jquery.min.js"></script>-->
+    <script type="text/javascript" src="lib/jquery.min.js"></script>
+    <script type="text/javascript" src="../jquery.easyui.min.js"></script>
+    
+    <script type="text/javascript" src="js/ganttView.js"></script>
+    <script type="text/javascript" src="data.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="style/ganttView.css"/>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body onload="initType()">
+<div>
+    <div>
+        <div>
+            <a class="searchBtn"></a>
+        </div>
+    </div>
+    <div class="container">
+        <div class="titbox"><div class="title">基本信息</div></div>
+        <div id="base" class="info" style="padding: 10px;">
+            <div><label for="WorkPlan">车间:</label><div id="WorkPlan"></div></div>
+            <div><label for="ProdLine">产线:</label><div id="ProdLine"></div></div>
+            <div><label for="DateTime">日期:</label><div id="DateTime"></div></div>
+            <div><label for="ProNo">产品编号:</label><div id="ProNo"></div></div>
+            <div> <input id="HideOrder" type="checkbox"><label for="HideOrder">不显示已完成工单</label></div>
+            <div> <input id="CancelTime" type="checkbox"><label for="CancelTime">取消产线休息时间</label></div>
+        </div>
+    </div>
+</div>
+<div>
+    <div id="taskList" class="task-list"></div>
+    <div class="formatBtn">
+        <button id="btn1">今日</button>
+        <button id="btn2">一周</button>
+        <button id="btn3">一月</button>
+    </div>
+    <div id="ganttChart"></div>
+    <br/><br/>
+    <button id="submit">提交</button>
+    <div id="eventMessage"></div>
+    <div id="submitData"></div>
+</div>
+</body>
+<script src="lib/jquery-ui.min.js"></script>
+<script src="index.js"></script>
+
+
+<!--<script src="index.js"></script>
+<script type="text/javascript" src="js/ganttView.js"></script>
+<script type="text/javascript" src="data.js"></script>
+<script src="lib/jquery-ui.min.js"></script>-->
+<script type="text/javascript">
+    $(function () {
+        for (var i = 0; i < divData.length; i++) {
+            var taskcolor = taskColor[i];
+            var taskobj = {
+                id:i,
+                name:divData[i].name,
+                start:divData[i].start,
+                end:divData[i].end,
+                flag:divData[i].flag,
+                options:{
+                    color:taskcolor
+                }
+
+            };
+            $("#taskList").append($("<div>",{
+                "class":"task",
+                "css":{"background":taskcolor}
+            }).append(divData[i].name).data("task",taskobj));
+
+        }
+        $(".task").draggable({
+            revert: true,
+            opacity: 0.7
+        });
+
+        var minDays = 6;
+        initView(minDays,ganttData);
+        $(".formatBtn>button").click(function () {
+
+            var index = $(this).index();
+            switch (index) {
+                case 0:
+                    minDays = 1;
+                    break;
+                case 1:
+                    minDays = 6;
+                    break;
+                case 2:
+                    minDays = 29;
+                    break;
+                default:
+                    break;
+            }
+            initView(minDays,ganttData);
+        });
+        function initView(minDays,data) {
+            $("#ganttChart").ganttView({
+                showWeekends: false,
+                data: data,
+                minDays: minDays,
+                behavior: {
+                    onClick: function (data) {
+                        var msg = "click事件:" + JSON.stringify(data);
+                        $("#eventMessage").text(msg);
+                    },
+                    onResize: function (data) {
+                        var msg = "resize事件:" + JSON.stringify(data);
+                        $("#eventMessage").text(msg);
+                    },
+                    onDrag: function (data) {
+                        var msg = "drag事件:" + JSON.stringify(data);
+                        $("#eventMessage").text(msg);
+                    },
+                    ondblclick: function(div,data) {
+                        var msg = "dblclick删除事件:" + JSON.stringify(data);
+                        $("#eventMessage").text(msg);
+                        div.remove()
+                    }
+                }
+            });
+        }
+        //提交
+        $("#submit").click(function () {
+            $("#ganttChart").ganttView("getDatas", function (datas) {
+                console.log(datas);
+                $("#submitData").text(JSON.stringify(datas));
+            });
+        });
+    });
+</script>
+
+</html>
